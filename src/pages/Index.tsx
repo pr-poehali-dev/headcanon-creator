@@ -10,6 +10,7 @@ const Index = () => {
   const [character, setCharacter] = useState("");
   const [description, setDescription] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const [headcanons, setHeadcanons] = useState([
     {
       id: 1,
@@ -45,15 +46,113 @@ const Index = () => {
     },
   ];
 
-  const generateHeadcanon = () => {
+  const headcanonTemplates = {
+    отношения: [
+      "тайно хранит письма/подарки, связанные с {description}",
+      "краснеет каждый раз, когда вспоминает о {description}",
+      "записывает в дневник все мысли о {description}",
+      "мечтает поделиться секретом о {description} с кем-то особенным",
+      "всегда находит способ связать разговор с темой {description}",
+    ],
+    "история/прошлое": [
+      "в детстве пережил важное событие, связанное с {description}, которое сформировало характер",
+      "когда-то активно занимался {description}, но бросил из-за обстоятельств",
+      "имеет тайное место, где думает о {description} в трудные моменты",
+      "потерял что-то важное, связанное с {description}, что объясняет текущее поведение",
+      "семейная история связана с {description}, о чем мало кто знает",
+    ],
+    привычки: [
+      "всегда делает что-то особенное, связанное с {description}, когда нервничает",
+      "коллекционирует предметы, напоминающие о {description}",
+      "каждое утро начинает день с ритуала, связанного с {description}",
+      "никогда не делает {description} - это принципиальная позиция",
+      "имеет странную привычку, связанную с {description}, в стрессовых ситуациях",
+    ],
+    дружба: [
+      "всегда рассказывает друзьям о {description} с особым энтузиазмом",
+      "становится защитным, когда кто-то критикует {description}",
+      "имеет традицию делиться {description} с лучшими друзьями",
+      "готов пожертвовать многим ради друзей, даже {description}",
+      "использует {description} как способ сблизиться с новыми людьми",
+    ],
+    "рандом/другое": [
+      "боится того, что связано с {description}, но никому не признается",
+      "умеет делать что-то неожиданное с {description}",
+      "всегда носит с собой что-то, связанное с {description}, для удачи",
+      "мечтает о {description}, но стесняется об этом говорить",
+      "имеет необычное хобби, связанное с {description}",
+    ],
+  };
+
+  const generateContextualContent = (
+    description: string,
+    category: string,
+    character: string,
+  ) => {
+    const templates =
+      headcanonTemplates[category as keyof typeof headcanonTemplates];
+    const randomTemplate =
+      templates[Math.floor(Math.random() * templates.length)];
+
+    let content = randomTemplate.replace(/{description}/g, description);
+
+    // Добавляем детали в зависимости от категории
+    const details = {
+      отношения: [
+        `Это началось незаметно, но теперь ${character} не может представить жизнь без этого чувства.`,
+        `Друзья замечают, как меняется выражение лица ${character}, когда заходит разговор об этом.`,
+        `${character} часто ловит себя на том, что улыбается, думая об этом.`,
+      ],
+      "история/прошлое": [
+        `Это событие случилось много лет назад, но до сих пор влияет на решения ${character}.`,
+        `Мало кто знает об этой части жизни ${character}, он редко делится такими воспоминаниями.`,
+        `Иногда ${character} возвращается мыслями к тому времени и удивляется, как многое изменилось.`,
+      ],
+      привычки: [
+        `Окружающие уже привыкли к этой особенности ${character} и даже находят её милой.`,
+        `${character} сам не всегда замечает, как делает это - настолько это стало естественным.`,
+        `Эта привычка помогает ${character} чувствовать себя увереннее в любых ситуациях.`,
+      ],
+      дружба: [
+        `Настоящие друзья ${character} понимают и принимают эту особенность его характера.`,
+        `Благодаря этому ${character} легко находит общий язык с людьми, разделяющими его интересы.`,
+        `Друзья часто обращаются к ${character} за советом именно в этой области.`,
+      ],
+      "рандом/другое": [
+        `Эта черта делает ${character} особенным и запоминающимся для окружающих.`,
+        `Мало кто ожидает такого от ${character}, что часто приводит к приятным сюрпризам.`,
+        `${character} долго скрывал эту сторону себя, но теперь гордится своей уникальностью.`,
+      ],
+    };
+
+    const categoryDetails = details[category as keyof typeof details];
+    const randomDetail =
+      categoryDetails[Math.floor(Math.random() * categoryDetails.length)];
+
+    return `${content} ${randomDetail}`;
+  };
+
+  const generateHeadcanon = async () => {
     if (!character || !description || !selectedCategory) return;
 
-    // Имитация генерации хэдканона
+    setIsGenerating(true);
+
+    // Имитация работы ИИ-бота
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1500 + Math.random() * 1000),
+    );
+
+    const generatedContent = generateContextualContent(
+      description,
+      selectedCategory,
+      character,
+    );
+
     const newHeadcanon = {
       id: Date.now(),
       character,
       category: selectedCategory,
-      content: `${character} ${description} - это создает интересную динамику в их характере...`,
+      content: generatedContent,
       timestamp: "только что",
     };
 
@@ -61,6 +160,7 @@ const Index = () => {
     setCharacter("");
     setDescription("");
     setSelectedCategory("");
+    setIsGenerating(false);
   };
 
   return (
@@ -87,8 +187,8 @@ const Index = () => {
             Создатель хэдканонов
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Создавайте уникальные хэдканоны для ваших любимых персонажей. Просто
-            опишите персонажа и получите интересные идеи!
+            ИИ-бот создаст уникальные хэдканоны для ваших любимых персонажей.
+            Просто опишите персонажа, и бот придумает интересные идеи!
           </p>
         </div>
 
@@ -155,11 +255,29 @@ const Index = () => {
 
               <Button
                 onClick={generateHeadcanon}
-                disabled={!character || !description || !selectedCategory}
+                disabled={
+                  !character ||
+                  !description ||
+                  !selectedCategory ||
+                  isGenerating
+                }
                 className="w-full h-12 bg-gradient-to-r from-soft-red to-soft-blue hover:from-soft-red/80 hover:to-soft-blue/80 text-white font-medium transition-all duration-200 disabled:opacity-50"
               >
-                <Icon name="Sparkles" size={18} className="mr-2" />
-                Создать хэдканон
+                {isGenerating ? (
+                  <>
+                    <Icon
+                      name="Loader2"
+                      size={18}
+                      className="mr-2 animate-spin"
+                    />
+                    ИИ создаёт хэдканон...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="Bot" size={18} className="mr-2" />
+                    Создать хэдканон
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
