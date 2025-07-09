@@ -151,8 +151,7 @@ const Index = () => {
     let content = randomTemplate.replace(/{description}/g, adaptedDescription);
 
     // Добавляем детали с учетом личности персонажа
-    const getPersonalityAdjustedDetails = () => {
-      const baseDetails = {
+    const details = {
       отношения: [
         `Это началось незаметно, но теперь ${character} не может представить жизнь без этого чувства.`,
         `Друзья замечают, как меняется выражение лица ${character}, когда заходит разговор об этом.`,
@@ -179,48 +178,58 @@ const Index = () => {
         `${character} долго скрывал эту сторону себя, но теперь гордится своей уникальностью.`,
       ],
     };
-    
+
     // Адаптируем детали под личность
     let adaptedDetails = { ...details };
-    
-    if (personalityTraits.includes('интроверт')) {
+
+    if (personalityTraits.includes("интроверт")) {
       const categoryKey = category as keyof typeof adaptedDetails;
-      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
-        detail => detail.replace(/друзья замечают/g, 'близкие люди иногда замечают')
-                      .replace(/рассказывает друзьям/g, 'делится с немногими')
-      );
-    }
-    
-    if (personalityTraits.includes('добрый')) {
-      const categoryKey = category as keyof typeof adaptedDetails;
-      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
-        detail => detail.includes('помогает') ? detail + ' Это проявление его доброй натуры.' : detail
-      );
-    }
-    
-    if (personalityTraits.includes('творческий')) {
-      const categoryKey = category as keyof typeof adaptedDetails;
-      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
-        detail => detail.includes('особенный') ? detail + ' Его творческая душа находит в этом вдохновение.' : detail
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map((detail) =>
+        detail
+          .replace(/друзья замечают/g, "близкие люди иногда замечают")
+          .replace(/рассказывает друзьям/g, "делится с немногими"),
       );
     }
 
-    const categoryDetails = adaptedDetails[category as keyof typeof adaptedDetails];
-    const randomDetail = categoryDetails[Math.floor(Math.random() * categoryDetails.length)];
+    if (personalityTraits.includes("добрый")) {
+      const categoryKey = category as keyof typeof adaptedDetails;
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map((detail) =>
+        detail.includes("помогает")
+          ? detail + " Это проявление его доброй натуры."
+          : detail,
+      );
+    }
+
+    if (personalityTraits.includes("творческий")) {
+      const categoryKey = category as keyof typeof adaptedDetails;
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map((detail) =>
+        detail.includes("особенный")
+          ? detail + " Его творческая душа находит в этом вдохновение."
+          : detail,
+      );
+    }
+
+    const categoryDetails =
+      adaptedDetails[category as keyof typeof adaptedDetails];
+    const randomDetail =
+      categoryDetails[Math.floor(Math.random() * categoryDetails.length)];
 
     // Добавляем финальное личностное примечание
-    let personalityNote = '';
+    let personalityNote = "";
     if (personalityTraits.length > 0) {
       const personalityNotes = {
-        интроверт: 'Хотя он не любит об этом говорить открыто.',
-        экстраверт: 'И он с удовольствием этим делится.',
-        добрый: 'Это отражает его заботливую натуру.',
-        строгий: 'Даже в этом проявляется его принципиальность.',
-        творческий: 'В этом видна его артистичная душа.',
-        рациональный: 'Даже здесь он остается логичным.'
+        интроверт: "Хотя он не любит об этом говорить открыто.",
+        экстраверт: "И он с удовольствием этим делится.",
+        добрый: "Это отражает его заботливую натуру.",
+        строгий: "Даже в этом проявляется его принципиальность.",
+        творческий: "В этом видна его артистичная душа.",
+        рациональный: "Даже здесь он остается логичным.",
       };
-      
-      personalityNote = personalityNotes[personalityTraits[0] as keyof typeof personalityNotes] || '';
+
+      personalityNote =
+        personalityNotes[
+          personalityTraits[0] as keyof typeof personalityNotes
+        ] || "";
     }
 
     return `${content} ${randomDetail} ${personalityNote}`.trim();
