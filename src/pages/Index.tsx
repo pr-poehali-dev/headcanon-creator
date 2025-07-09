@@ -84,20 +84,75 @@ const Index = () => {
     ],
   };
 
+  const analyzePersonality = (personality: string) => {
+    const traits = {
+      интроверт: ["замкнутый", "тихий", "скрытный", "одиночка", "застенчивый"],
+      экстраверт: [
+        "общительный",
+        "открытый",
+        "энергичный",
+        "социальный",
+        "активный",
+      ],
+      добрый: [
+        "милосердный",
+        "отзывчивый",
+        "заботливый",
+        "мягкий",
+        "понимающий",
+      ],
+      строгий: [
+        "серьезный",
+        "требовательный",
+        "дисциплинированный",
+        "принципиальный",
+      ],
+      творческий: [
+        "креативный",
+        "артистичный",
+        "фантазер",
+        "оригинальный",
+        "вдохновенный",
+      ],
+      рациональный: ["логичный", "практичный", "расчетливый", "аналитический"],
+    };
+
+    const detected = [];
+    const lowerPersonality = personality.toLowerCase();
+
+    for (const [trait, keywords] of Object.entries(traits)) {
+      if (keywords.some((keyword) => lowerPersonality.includes(keyword))) {
+        detected.push(trait);
+      }
+    }
+
+    return detected;
+  };
+
   const generateContextualContent = (
     description: string,
     category: string,
     character: string,
   ) => {
+    const personalityTraits = analyzePersonality(description);
+
     const templates =
       headcanonTemplates[category as keyof typeof headcanonTemplates];
     const randomTemplate =
       templates[Math.floor(Math.random() * templates.length)];
 
-    let content = randomTemplate.replace(/{description}/g, description);
+    // Создаем адаптированный контент на основе личности
+    let adaptedDescription = description;
+    if (personalityTraits.length > 0) {
+      const trait = personalityTraits[0];
+      adaptedDescription = `${description} (особенно проявляется его ${trait} натура)`;
+    }
 
-    // Добавляем детали в зависимости от категории
-    const details = {
+    let content = randomTemplate.replace(/{description}/g, adaptedDescription);
+
+    // Добавляем детали с учетом личности персонажа
+    const getPersonalityAdjustedDetails = () => {
+      const baseDetails = {
       отношения: [
         `Это началось незаметно, но теперь ${character} не может представить жизнь без этого чувства.`,
         `Друзья замечают, как меняется выражение лица ${character}, когда заходит разговор об этом.`,
@@ -124,12 +179,51 @@ const Index = () => {
         `${character} долго скрывал эту сторону себя, но теперь гордится своей уникальностью.`,
       ],
     };
+    
+    // Адаптируем детали под личность
+    let adaptedDetails = { ...details };
+    
+    if (personalityTraits.includes('интроверт')) {
+      const categoryKey = category as keyof typeof adaptedDetails;
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
+        detail => detail.replace(/друзья замечают/g, 'близкие люди иногда замечают')
+                      .replace(/рассказывает друзьям/g, 'делится с немногими')
+      );
+    }
+    
+    if (personalityTraits.includes('добрый')) {
+      const categoryKey = category as keyof typeof adaptedDetails;
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
+        detail => detail.includes('помогает') ? detail + ' Это проявление его доброй натуры.' : detail
+      );
+    }
+    
+    if (personalityTraits.includes('творческий')) {
+      const categoryKey = category as keyof typeof adaptedDetails;
+      adaptedDetails[categoryKey] = adaptedDetails[categoryKey].map(
+        detail => detail.includes('особенный') ? detail + ' Его творческая душа находит в этом вдохновение.' : detail
+      );
+    }
 
-    const categoryDetails = details[category as keyof typeof details];
-    const randomDetail =
-      categoryDetails[Math.floor(Math.random() * categoryDetails.length)];
+    const categoryDetails = adaptedDetails[category as keyof typeof adaptedDetails];
+    const randomDetail = categoryDetails[Math.floor(Math.random() * categoryDetails.length)];
 
-    return `${content} ${randomDetail}`;
+    // Добавляем финальное личностное примечание
+    let personalityNote = '';
+    if (personalityTraits.length > 0) {
+      const personalityNotes = {
+        интроверт: 'Хотя он не любит об этом говорить открыто.',
+        экстраверт: 'И он с удовольствием этим делится.',
+        добрый: 'Это отражает его заботливую натуру.',
+        строгий: 'Даже в этом проявляется его принципиальность.',
+        творческий: 'В этом видна его артистичная душа.',
+        рациональный: 'Даже здесь он остается логичным.'
+      };
+      
+      personalityNote = personalityNotes[personalityTraits[0] as keyof typeof personalityNotes] || '';
+    }
+
+    return `${content} ${randomDetail} ${personalityNote}`.trim();
   };
 
   const generateHeadcanon = async () => {
@@ -216,12 +310,12 @@ const Index = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Краткое описание
+                  Описание личности
                 </label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Опишите персонажа или ситуацию..."
+                  placeholder="Опишите характер, темперамент, особенности личности персонажа..."
                   className="border-2 border-soft-pink/30 focus:border-soft-purple transition-colors min-h-[100px]"
                 />
               </div>
